@@ -1,0 +1,42 @@
+name: Test Minio
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  AWS_S3_BUCKET: testbucket
+  AWS_S3_ACCESS_KEY: minioadmin
+  AWS_S3_SECRET_KEY: minioadmin
+  AWS_S3_ENDPOINT: http://127.0.0.1:9000
+jobs:
+  test-with-minio:
+    runs-on: ubuntu-latest
+    services:
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ACCESS_KEY: ${{ env.AWS_S3_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ env.AWS_S3_SECRET_KEY }}
+        volumes:
+          - /tmp/data:/data
+          - /tmp/config:/root/.minio
+        ports:
+          - 9000:9000
+        options: --name minio
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Minio Bucket
+        run: |
+          aws s3 --endpoint-url http://minio:9000 mb s3://testbucket
+      - name: Test Create File
+        run: |
+          echo "Hello World" > hello.txt
+          aws s3 --endpoint-url http://minio:9000 cp hello.txt s3://testbucket/hello.txt
+      - name: Test List Files
+        run: |
+          aws s3 --endpoint-url http://minio:9000 ls s3://testbucket
+      - name: Test Delete File
+        run: |
+          aws s3 --endpoint-url http://minio:9000 rm s3://testbucket/hello.txt
