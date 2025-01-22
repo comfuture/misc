@@ -9,7 +9,8 @@ env:
   AWS_ACCESS_KEY_ID: minioadmin
   AWS_SECRET_ACCESS_KEY: minioadmin
   AWS_S3_BUCKET: testbucket
-  AWS_S3_ENDPOINT: http://127.0.0.1:9000
+  AWS_S3_ENDPOINT: http://minio:9000
+  AWS_EC2_METADATA_DISABLED: true
 jobs:
   test-with-minio:
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
           - /tmp/config:/root/.minio
         ports:
           - 9000:9000
-        options: --name minio
+        options: server /data
     steps:
       - uses: actions/checkout@v4
       - name: Set up Minio Bucket
