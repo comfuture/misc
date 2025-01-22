@@ -2,7 +2,7 @@ name: Test Minio
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 env:
